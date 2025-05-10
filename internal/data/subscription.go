@@ -12,34 +12,60 @@ import (
 )
 
 func (m *DataModel) Sub(topic string) {
-	var callback mqtt.MessageHandler
-	if strings.HasPrefix(topic, "home/") {
-		if strings.HasSuffix(topic, "/startup") {
-			callback = m.startupHandler
+	
+	// DEBUG
+	m.Logger.Debug("Sub subscribing to MQTT topic", slog.String("TOPIC", topic))
+	
+	token := m.Broker.Subscribe(topic, m.Broker.qos, m.mqttHandler)
+	token.Wait()
+}
+
+func (m *DataModel) mqttHandler(client mqtt.Client, msg mqtt.Message) {
+	
+	if strings.HasPrefix(msg.Topic(), "home/") {
+		if strings.HasSuffix(msg.Topic(), "/startup") {
+			m.startupHandler(client, msg)
 		} else {
-			callback = m.dataHandler
+			m.dataHandler(client, msg)
 		}
 	} else {
-		callback = m.messageHandler
+		m.messageHandler(client, msg)
 	}
-	token := m.Broker.Subscribe(topic, m.Broker.qos, callback)
-	token.Wait()
 }
 
 func (m *DataModel) dataHandler(client mqtt.Client, msg mqtt.Message) {
 	// DEBUG
 	m.Logger.Debug("received MQTT message", slog.String("HANDLER", "dataHandler"), slog.String("TOPIC", msg.Topic()), slog.String("PAYLOAD", string(msg.Payload())))
 	
+	// Getting data from message
 	data, err := m.NewData(msg)
 	if err != nil {
 		m.Logger.Error(fmt.Errorf("error creating data from MQTT message: %w", err).Error())
 		m.Logger.Warn("aborting data creation")
 		return
 	}
+	
+	// Insert new data in database
 	err = m.insert(data)
 	if err != nil {
 		m.Logger.Error(fmt.Errorf("error inserting data: %w", err).Error())
 		m.Logger.Warn("aborting data creation")
+	}
+	
+	// Getting module from data
+	module := &Module{
+		Model: gorm.Model{
+			ID: data.ModuleID,
+		},
+		DeviceID: data.DeviceID,
+		Name:     data.ModuleName,
+		Value:    data.ModuleValue,
+	}
+	
+	// Update module in database
+	err = m.UpdateModule(module)
+	if err != nil {
+		m.Logger.Error(err.Error())
 	}
 }
 
@@ -56,6 +82,9 @@ func (m *DataModel) startupHandler(client mqtt.Client, msg mqtt.Message) {
 	
 	// Convert the StartupMessage into a Device
 	device := startupMessage.ToDevice()
+	
+	// DEBUG
+	m.Logger.Debug(fmt.Sprintf("startup device info: %+v", device))
 	
 	// Check if the Device exists and create it if not
 	err = m.Check(device)
@@ -88,7 +117,7 @@ func (m *DataModel) startupHandler(client mqtt.Client, msg mqtt.Message) {
 	}
 	
 	// Respond to the device with the data fetched or created
-	m.Broker.Pub(msg.Topic(), string(jsonMessage))
+	m.Broker.Pub(device.GetChannel(&Setup{}), string(jsonMessage))
 }
 
 func (m *DataModel) messageHandler(client mqtt.Client, msg mqtt.Message) {

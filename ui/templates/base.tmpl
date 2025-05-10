@@ -27,34 +27,34 @@
 
 {{/*            Name left           */}}
                 <div class="name relative">
-                    <a href="/home" class="abs full on-top"></a>
+                    <a href="/" class="abs full on-top"></a>
                     Home IoT
                 </div>
 
 {{/*            Nav Home Articles           */}}
-                <nav class="header-nav">
-                    <a href="/home" class="header-link">Home</a>
-                    <a href="/home" class="header-link">Latest</a>
-                </nav>
+{{/*                <nav class="header-nav">*/}}
+{{/*                    <a href="/home" class="header-link">Home</a>*/}}
+{{/*                    <a href="/home" class="header-link">Latest</a>*/}}
+{{/*                </nav>*/}}
 
 {{/*            Search bar          */}}
-                <form action="/search" method="get" class="search-bar">
+{{/*                <form action="/search" method="get" class="search-bar">*/}}
 
-                    {{/*CSRF Token*/}}
-                    <input type="hidden" name="csrf_token" value="{{ .CSRFToken }}">
+{{/*                    */}}{{/*CSRF Token*/}}
+{{/*                    <input type="hidden" name="csrf_token" value="{{ .CSRFToken }}">*/}}
 
-                    {{/*Shortcut Message*/}}
-                    <span class="search-label">Ctrl+K</span>
+{{/*                    */}}{{/*Shortcut Message*/}}
+{{/*                    <span class="search-label">Ctrl+K</span>*/}}
 
-                    {{/*Search input*/}}
-                    <label class="abs display-none" for="search-input"></label>
-                    <input type="text" name="q" id="search-input" class="search-input" required />
+{{/*                    */}}{{/*Search input*/}}
+{{/*                    <label class="abs display-none" for="search-input"></label>*/}}
+{{/*                    <input type="text" name="q" id="search-input" class="search-input" required />*/}}
 
-                    {{/*Submit button*/}}
-                    <button type="submit" class="search-btn">
-                        <i data-lucide="search" class="search-icon"></i>
-                    </button>
-                </form>
+{{/*                    */}}{{/*Submit button*/}}
+{{/*                    <button type="submit" class="search-btn">*/}}
+{{/*                        <i data-lucide="search" class="search-icon"></i>*/}}
+{{/*                    </button>*/}}
+{{/*                </form>*/}}
 
 {{/*            Social links           */}}
 {{/*                 <div class="header-social"> */}}
@@ -113,14 +113,14 @@
 
             {{/*Copyrights*/}}
             <div class="copyrights">
-                &copy; {{ .CurrentYear }} Antoine de Barbarin. All rights reserved.
+                &copy; {{ .CurrentYear }} Nicolas Moyon - Antoine de Barbarin. All rights reserved.
             </div>
 
             {{/*Nav links*/}}
-            <nav class="footer-links">
-                <a href="/policies#privacy" class="footer-link">Privacy Policy</a>
-                <a href="/policies#terms" class="footer-link">Terms &amp; Conditions</a>
-            </nav>
+{{/*            <nav class="footer-links">*/}}
+{{/*                <a href="/policies#privacy" class="footer-link">Privacy Policy</a>*/}}
+{{/*                <a href="/policies#terms" class="footer-link">Terms &amp; Conditions</a>*/}}
+{{/*            </nav>*/}}
 
 {{/*            */}}{{/*Social links*/}}
 {{/*            <div class="footer-social">*/}}
@@ -165,6 +165,7 @@
 
         {{/*including the CSRF token in the axios requests*/}}
         axios.defaults.headers.common['X-CSRF-TOKEN'] = {{ .CSRFToken }};
+        axios.defaults.withCredentials = true;
 
 
         {{/*####################################*/}}
@@ -195,26 +196,26 @@
         {{/*####################################*/}}
 
         {{/*Prevent predefined messages when search is invalid*/}}
-        const searchInput = document.querySelector('input#search-input.search-input');
-        searchInput.addEventListener('invalid', (function () {
-            return function (e) {
-                e.preventDefault();
-                searchInput.focus();
-            };
-        })(), true);
+        // const searchInput = document.querySelector('input#search-input.search-input');
+        // searchInput.addEventListener('invalid', (function () {
+        //     return function (e) {
+        //         e.preventDefault();
+        //         searchInput.focus();
+        //     };
+        // })(), true);
 
         {{/*Access search input when typing Ctrl+K*/}}
-        document.addEventListener("keydown", (e) => {
-            e = e || window.event;
-            if (e.ctrlKey && e.key === "k") {
-                searchInput.focus();
-                e.preventDefault();
-            }
-        });
+        // document.addEventListener("keydown", (e) => {
+        //     e = e || window.event;
+        //     if (e.ctrlKey && e.key === "k") {
+        //         searchInput.focus();
+        //         e.preventDefault();
+        //     }
+        // });
 
         {{/*Access search input when clicking on tag Ctrl+K*/}}
-        const searchTag = document.querySelector('.search-label');
-        searchTag.addEventListener('click', () => searchInput.focus());
+        // const searchTag = document.querySelector('.search-label');
+        // searchTag.addEventListener('click', () => searchInput.focus());
 
 
         {{/*####################################*/}}
@@ -225,7 +226,42 @@
             window.history.pushState({}, "{{ .Title }}", window.location.href.replace(/csrf_token[^&]+&?/, ''));
         }
 
-        const ws = new WebSocket("ws://localhost:8080/ws");
+
+        {{/*####################################*/}}
+        {{/*    Location name update form       */}}
+        {{/*####################################*/}}
+
+        {{/*<form data-id="{{ .Location.ID }}" class="location-form">*/}}
+        {{/*    <input type="hidden" name="csrf_token" value="{{ $csrf_token }}">*/}}
+        {{/*        <label for="location-name-input"></label>*/}}
+        {{/*        <input id="location-name-input" type="text" class="location-name-input" value="{{ .Location.Name }}" />*/}}
+        {{/*        <button class="button location-form-button">Update</button>*/}}
+        {{/*</form>*/}}
+
+        const locationForms = document.querySelectorAll('.location-form');
+        if (!!locationForms && locationForms.length > 0) {
+            locationForms.forEach(form => {
+                form.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    const locationName = form.querySelector('.location-name-input').value;
+                    console.log(`locationName: ${locationName}`);
+                    axios.post(`/locations/${form.dataset.id}`, { locationName: locationName })
+                        .then(function (response) {
+                            console.log(response);
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        });
+                });
+            });
+        }
+
+
+        {{/*####################################*/}}
+        {{/*              Websockets            */}}
+        {{/*####################################*/}}
+
+        const ws = new WebSocket("{{ .WebsocketURL }}");
         ws.onmessage = (event) => {
             console.log("Received:", event.data);
             // Parse the received JSON data
@@ -260,7 +296,12 @@
                                 moduleName.textContent = module.Name;
                             }
                             if (moduleValue) {
-                                moduleValue.textContent = module.Value;
+                                const numericValue = Number(module.Value);
+                                if (module.Value !== '' && !isNaN(numericValue)) {
+                                    moduleValue.textContent = numericValue.toFixed(1).toString();
+                                } else {
+                                    moduleValue.textContent = module.Value;
+                                }
                             }
                         }
                     });

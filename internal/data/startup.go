@@ -3,6 +3,8 @@ package data
 import (
 	"encoding/json"
 	"fmt"
+	
+	"gorm.io/gorm"
 )
 
 type StartupMessage struct {
@@ -26,7 +28,7 @@ func NewStartupMessage(payload []byte) (*StartupMessage, error) {
 }
 
 func NewResponseMessage(device *Device) *StartupMessage {
-
+	
 	// Create the responseMessage
 	responseMessage := &StartupMessage{
 		DeviceID:     device.ID,
@@ -35,7 +37,7 @@ func NewResponseMessage(device *Device) *StartupMessage {
 		LocationType: device.Location.Type,
 		LocationName: device.Location.Name,
 	}
-
+	
 	// Add the modules
 	for _, module := range device.Modules {
 		responseMessage.Modules = append(responseMessage.Modules, struct {
@@ -43,22 +45,26 @@ func NewResponseMessage(device *Device) *StartupMessage {
 			Value string `json:"value"`
 		}{Name: module.Name, Value: module.Value})
 	}
-
+	
 	return responseMessage
 }
 
 func (startupMessage *StartupMessage) ToDevice() *Device {
 	location := &Location{
+		Model: gorm.Model{
+			ID: startupMessage.LocationID,
+		},
 		Type: startupMessage.LocationType,
 		Name: startupMessage.LocationName,
 	}
 	device := &Device{
 		ID:         startupMessage.DeviceID,
-		LocationID: 0,
+		LocationID: startupMessage.LocationID,
 		Location:   *location,
 		Type:       startupMessage.Type,
 		Modules:    nil,
 	}
+	
 	for _, module := range startupMessage.Modules {
 		device.Modules = append(device.Modules, Module{
 			Name:  module.Name,

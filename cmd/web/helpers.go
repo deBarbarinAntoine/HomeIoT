@@ -192,10 +192,13 @@ func (app *application) serverError(w http.ResponseWriter, r *http.Request, err 
 //	w - The HTTP response writer
 //	status - The HTTP status code
 //	msg - The message to send in the response
-func (app *application) ajaxResponse(w http.ResponseWriter, status int, msg string) {
+func (app *application) ajaxResponse(w http.ResponseWriter, status int, msg envelope, err error) {
 	
 	// setting the response data
 	var resData envelope
+	
+	// DEBUG
+	app.logger.Debug(fmt.Sprintf("status: %d", status))
 	
 	// checking the status code
 	if status < http.StatusBadRequest {
@@ -204,8 +207,11 @@ func (app *application) ajaxResponse(w http.ResponseWriter, status int, msg stri
 		resData = envelope{"response": msg}
 		
 	} else {
+		if nil == err {
+			err = fmt.Errorf("no error sent to ajaxResponse")
+		}
 		// logging the error
-		app.logger.Error(msg)
+		app.logger.Error(err.Error())
 		
 		// wrapping error in JSON object
 		resData = envelope{"error": "internal server error"}
@@ -219,7 +225,7 @@ func (app *application) ajaxResponse(w http.ResponseWriter, status int, msg stri
 	}
 	
 	// setting the Content-Type header to JSON
-	w.Header().Set("Content-Type", "application/jsonData")
+	w.Header().Set("Content-Type", "application/json")
 	
 	// setting the Status response
 	w.WriteHeader(status)
@@ -322,10 +328,11 @@ func (app *application) newTemplateData(r *http.Request) templateData {
 	
 	// returning the templateData with all information
 	var tmplData = templateData{
-		CurrentYear: time.Now().Year(),
-		Flash:       app.sessionManager.PopString(r.Context(), "flash"),
-		Nonce:       nonce,
-		CSRFToken:   nosurf.Token(r),
+		WebsocketURL: fmt.Sprintf("ws://%s:%d/ws", app.config.websocketURL, app.config.port),
+		CurrentYear:  time.Now().Year(),
+		Flash:        app.sessionManager.PopString(r.Context(), "flash"),
+		Nonce:        nonce,
+		CSRFToken:    nosurf.Token(r),
 		Error: struct {
 			Title   string
 			Message string

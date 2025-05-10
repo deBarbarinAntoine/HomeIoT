@@ -4,6 +4,14 @@
             <div id="{{ .ID }}">
             <div class="name">{{ .Name }}</div>
             <div class="type">{{ .Type }}</div>
+            <div class="location">
+                <div class="location-name">{{ .Location.Name }}</div>
+                <form data-id="{{ .Location.ID }}" class="location-form">
+                    <label for="location-name-input"></label>
+                    <input name="locationName" id="location-name-input" type="text" class="location-name-input" value="{{ .Location.Name }}" />
+                    <button type="submit" class="button location-form-button">Update</button>
+                </form>
+            </div>
             {{ range .Modules}}
                 <div class="module">
                     <div id="id-{{ .ID }}">

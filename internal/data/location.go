@@ -16,6 +16,12 @@ type LocationModel struct {
 	DB *gorm.DB
 }
 
+func (m *LocationModel) GetByID(id uint) *Location {
+	var location *Location
+	m.DB.Model(&Location{}).Where("id = ?", id).First(&location)
+	return location
+}
+
 func (m *LocationModel) Delete(id uint) error {
 	var usages int64
 	err := m.DB.Model(&Device{}).Where("location_id = ?", id).Count(&usages).Error

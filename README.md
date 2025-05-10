@@ -5,7 +5,7 @@
 
 ## Presentation
 
-This project is made by Computer Science students for an assignment.
+This project is made by Computer Science students for an assignment involving a client application, in this case a website, and a real time interaction with the physical world via ESP32 boards.
 
 **Home&Co** _(Co for Connect, Control, Company)_ is a project using **ESP32** dev boards and a **Raspberry Pi 3B+** to monitor, control and automate home appliances like the lights, heaters, front door, water valves for watering plants, etc.
 
@@ -32,7 +32,7 @@ You can **automate the heaters** to activate at any time of the day, to find a w
 
 ### 4. Peace of mind
 
-You won't have to go through your check list three times or ask your neighbour to water your plants before going out!
+You won't have to go through your checklist three times or ask your neighbour to water your plants before going out!
 
 You can **monitor your house from any device** using the website in **real time**: from the _presence detectors_ to the _lights_, _heaters_, _humidity of the plants_ and _temperature of any room_.
 
@@ -49,22 +49,60 @@ You'll also be able to **monitor the energy of specific high consumption applian
 
 ### Needs analysis
 
-- Fully functional home with remote control (from phone or any other device)
-- Security: no direct access to sensors or actuators (ESP32), to database, MQTT or backend application.
-- Raspberry Pi 3 or more for WiFi access point, MQTT, backend app and webserver.
-- ESP32 for sensors & actuators
+- **Goal**: fully functional home with remote control (from the web browser)
+- **Security Constraint**: no direct access to ESP32 microcontrollers with their sensors and actuators, to database, MQTT or backend application.
+- **Components**:
+  - Raspberry Pi 3 or more for Wi-Fi access point, MQTT, backend app and webserver.
+  - ESP32 for sensors & actuators
 
 ### Technical choices
 
-- Golang for the backend app and webserver with GORM: easy to use system language with good web libraries and ORM
-- PostgreSQL for the database: the best Open Source database
-- Mosquitto for the MQTT broker: good Open Source MQTT broker (up to date and good documentation)
-- RaspAP for the WiFi Access Point in the Raspberry Pi: the most updated and documented Access Point software we found
-- Websocket between JavaScript clients and Golang server: best solution for event driven actualization in the frontend.
-- PlatformIO and C/C++ for the ESP32: the most manageable software to compile and upload C/C++ code on ESP32
+- **Golang** for the backend app and webserver with GORM:
+	- Golang is an excellent choice for building efficient, concurrent applications due to its simplicity and strong type system.
+    - The Go standard library is comprehensive, making it easy to handle tasks like networking, file I/O, and concurrency.
+    - GORM, a popular ORM for Golang, simplifies database interactions by providing a clean and intuitive API.
 
+- **PostgreSQL** for the database:
+	- PostgreSQL is an advanced, open source relational database management system known for its robustness, scalability, and ACID compliance.
+    - It offers features like transactions, indexing, and support for complex data types, making it ideal for handling diverse and large-scale applications.
 
-### Architecture
+- **Mosquitto** for the MQTT broker:
+	- Mosquitto is a lightweight, open source MQTT broker that's highly reliable and easy to configure.
+    - Its simplicity and performance make it an excellent choice for real-time communication between devices and services, especially in scenarios where low latency and high availability are crucial.
+
+- **RaspAP** for the Wi-Fi Access Point in the Raspberry Pi:
+  - RaspAP provides a user-friendly interface for setting up and managing a Wi-Fi access point on a Raspberry Pi.
+  - It simplifies the process of configuring network settings, security protocols, and other related tasks, making it accessible even to users with limited technical expertise.
+
+- **Websocket** between JavaScript clients and Golang server:
+  - Websockets provide full-duplex communication channels over a single TCP connection, enabling real-time data exchange between the frontend and backend.
+  - This is particularly useful for applications requiring immediate updates and interactions, such as chat applications or live dashboards.
+
+- **PlatformIO** and **C**/**C++** for the ESP32:
+	- PlatformIO offers a unified development environment for embedded systems, making it easy to manage multiple projects and boards.
+    - It supports a wide range of platforms and tools, including C/C++, which is ideal for writing efficient and low-level code for microcontrollers like the ESP32.
+
+### Basic features
+
+- Monitoring sensors with the web interface
+- Controlling actuators from the web interface
+- Data collection in the database
+- Light and temperature management
+- Front door monitoring with `RFID` badge
+
+### Additional features (future release)
+
+- Energy consumption management
+- Shutter and window management
+- Fire and smoke detection
+- Alarm mode
+- Ventilation management
+- Scheduler for actuators (heaters, light, shutters, ventilation)
+- Statistics and prevision dashboards
+
+### Components architecture
+
+#### Overall Infrastructure
 
 ```mermaid
 stateDiagram-v2
@@ -80,7 +118,7 @@ stateDiagram-v2
         A --> DB: Updates the database
     }
     
-    LD: Light
+    LD: Light Microcontroller (ESP32)
     state LD {
         App: Application
         B: Broker
@@ -89,14 +127,27 @@ stateDiagram-v2
         TS: Temperature Sensor
         PD: Presence Detector
         
-        LC --> B: Subscribes /lightController channel
+        App --> B: Instanciates
+        App --> LC: Instanciates
+        App --> LS: Instanciates
+        App --> TS: Instanciates
+        App --> PD: Instanciates
+        LC --> B: Subscribes channel
+        LS --> B: Publishes value
+        TS --> B: Publishes value
+        PD --> B: Publishes value
     }
     
-    B --> MQTT: Connects
+    FW: Firewall
+    I: Internet
     
+    B --> MQTT: Connects
+    FW --> A: Protects
+    A --> FW: Listens to requests
+    FW --> I
 ```
 
-### Database
+#### Database
 
 ```mermaid
 ---
@@ -149,6 +200,7 @@ erDiagram
         string password_hash
         string email
         string phone_number
+        string rfid
         string status
     }
     SESSIONS {
@@ -163,12 +215,7 @@ erDiagram
     DATA |o--o{ USERS : "owns"
 ```
 
-### Incoming features
-
-- Monitoring sensors with the web interface
-- Controlling actuators from the web interface
-
-### MQTT
+#### MQTT
 
 ```mermaid
 ---
@@ -255,8 +302,114 @@ flowchart LR
     home    --- room        --- room2_id    --- light           --- device4     --- light_controller & luminosity_sensor
 ```
 
+#### Web Server file architecture
 
-### Class diagram
+```
+├── cmd
+│   └── web
+│       ├── context.go
+│       ├── handlers.go
+│       ├── helpers.go
+│       ├── main.go
+│       ├── middleware.go
+│       ├── models.go
+│       ├── routes.go
+│       ├── server.go
+│       └── templates.go
+├── data.sql
+├── go.mod
+├── go.sum
+├── internal
+│   ├── data
+│   │   ├── broker.go
+│   │   ├── consumption-sensor.go
+│   │   ├── data.go
+│   │   ├── device.go
+│   │   ├── imodule.go
+│   │   ├── light-controller.go
+│   │   ├── light-sensor.go
+│   │   ├── location.go
+│   │   ├── luminosity-sensor.go
+│   │   ├── models.go
+│   │   ├── module.go
+│   │   ├── presence-detector.go
+│   │   ├── reset.go
+│   │   ├── startup.go
+│   │   ├── subscription.go
+│   │   ├── temperature-sensor.go
+│   │   └── value-conversion.go
+│   ├── mailer
+│   │   ├── mailer.go
+│   │   └── templates
+│   │       └── alert-notification.tmpl
+│   └── validator
+│       └── validator.go
+├── README.md
+├── ui
+│   ├── assets
+│   │   ├── css
+│   │   │   ├── base.scss
+│   │   │   └── style.scss
+│   │   ├── font
+│   │   │   ├── Dosis-VariableFont_wght.ttf
+│   │   └── img
+│   │       └── logo
+│   │           └── logo.png
+│   ├── efs.go
+│   └── templates
+│       ├── base.tmpl
+│       ├── pages
+│       │   ├── dashboard.tmpl
+│       │   ├── error.tmpl
+│       │   └── home.tmpl
+│       └── partials
+│           └── partial-example.tmpl
+└── vendor
+```
+
+#### ESP32 C++ File Architecture
+
+```
+├── include
+│   ├── Application.h
+│   ├── Broker.h
+│   ├── ConsumptionSensor.h
+│   ├── environment.h
+│   ├── IModule.h
+│   ├── IObservable.h
+│   ├── IObserver.h
+│   ├── LightController.h
+│   ├── LightSensor.h
+│   ├── LuminositySensor.h
+│   ├── ModuleFactory.h
+│   ├── MyAny.h
+│   ├── PresenceDetector.h
+│   ├── README
+│   ├── TemperatureSensor.h
+│   └── utils.h
+├── lib
+│   ├── README
+│   └── xht11
+│       ├── xht11.cpp
+│       └── xht11.h
+├── LICENSE
+├── platformio.ini
+├── README.md
+└── src
+   ├── Application.cpp
+   ├── Broker.cpp
+   ├── ConsumptionSensor.cpp
+   ├── HomeIoT.ino
+   ├── LightController.cpp
+   ├── LightSensor.cpp
+   ├── LuminositySensor.cpp
+   ├── ModuleFactory.cpp
+   ├── PresenceDetector.cpp
+   ├── TemperatureSensor.cpp
+   └── utils.cpp
+```
+
+#### Class diagram
 
 ```mermaid
 ---
@@ -374,9 +527,9 @@ classDiagram
     IModule ..|> IObservable
 ```
 
-### Startup / Setup
+#### Startup / Setup
 
-#### Startup/Setup message
+##### Startup/Setup message
 ```json
 {
   "id": "ESP32-af6f-43b1-a20e",
@@ -413,7 +566,7 @@ classDiagram
 }
 ```
 
-#### Setup sequence diagram
+##### Setup sequence diagram
 
 ```mermaid
 sequenceDiagram
@@ -454,3 +607,4 @@ sequenceDiagram
     A ->> CS: Update value
     A ->> S: Setup complete
 ```
+

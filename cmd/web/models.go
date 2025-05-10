@@ -4,20 +4,21 @@ import (
 	"html/template"
 	"log/slog"
 	"sync"
-
+	
 	"HomeIoT/internal/data"
 	"HomeIoT/internal/mailer"
 	"HomeIoT/internal/validator"
-
+	
 	"github.com/alexedwards/scs/v2"
 	"github.com/go-playground/form/v4"
 )
 
 // config represents the configuration variables for the application.
 type config struct {
-	port   int64
-	env    string
-	broker struct {
+	websocketURL string
+	port         int64
+	env          string
+	broker       struct {
 		host                string
 		port                int64
 		subscriptionChannel string
@@ -49,19 +50,20 @@ type application struct {
 
 // templateData represents the data structure used in templates.
 type templateData struct {
-	Title       string
-	CurrentYear int
-	Form        any
-	Flash       string
-	Nonce       string
-	CSRFToken   string
-	ResetToken  string
-
+	WebsocketURL string
+	Title        string
+	CurrentYear  int
+	Form         any
+	Flash        string
+	Nonce        string
+	CSRFToken    string
+	ResetToken   string
+	
 	Devices   []*data.Device
 	Locations []*data.Location
 	Device    *data.Device
 	Location  *data.Location
-
+	
 	Error struct {
 		Title   string
 		Message string
