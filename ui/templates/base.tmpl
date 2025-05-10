@@ -243,14 +243,18 @@
             locationForms.forEach(form => {
                 form.addEventListener('submit', function (e) {
                     e.preventDefault();
+
                     const locationName = form.querySelector('.location-name-input').value;
-                    console.log(`locationName: ${locationName}`);
-                    axios.post(`/locations/${form.dataset.id}`, { locationName: locationName })
-                        .then(function (response) {
-                            console.log(response);
+                    const locationID = form.dataset.id;
+
+                    axios.post(`/locations/${locationID}`, {
+                        locationName: locationName
+                    })
+                        .then(response => {
+                            console.log("Success:", response.data);
                         })
-                        .catch(function (error) {
-                            console.log(error);
+                        .catch(error => {
+                            console.error("Error:", error.response?.data || error);
                         });
                 });
             });
