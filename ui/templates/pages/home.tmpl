@@ -1,25 +1,39 @@
 {{define "page"}}
     <div class="home">
         {{ range .Devices }}
+            {{ $deviceID := .ID }}
             <div id="{{ .ID }}">
-            <div class="name">{{ .Name }}</div>
-            <div class="type">{{ .Type }}</div>
-            <div class="location">
-                <div class="location-name">{{ .Location.Name }}</div>
-                <form data-id="{{ .Location.ID }}" class="location-form">
-                    <label for="location-name-input"></label>
-                    <input name="locationName" id="location-name-input" type="text" class="location-name-input" value="{{ .Location.Name }}" />
-                    <button type="submit" class="button location-form-button">Update</button>
-                </form>
-            </div>
-            {{ range .Modules}}
-                <div class="module">
-                    <div id="id-{{ .ID }}">
-                    <div class="module-name">{{ .Name }}</div>
-                    <div class="module-value">{{ .Value }}</div>
-                    </div>
+                <div class="name">{{ .Name }}</div>
+                <div class="type">Type: {{ .Type }}</div>
+                <div class="location flex-row justify-space-between padding-v-3">
+                    <div class="location-name">{{ .Location.Name }}</div>
+                    <form data-id="{{ .Location.ID }}" class="location-form flex-row gap-3">
+                        <label for="location-name-input"></label>
+                        <input name="locationName" id="location-name-input" type="text" class="location-name-input" value="{{ .Location.Name }}" />
+                        <button type="submit" class="button location-form-button">Update</button>
+                    </form>
                 </div>
-            {{ end }}
+
+                {{ range .Modules}}
+                    <div class="module">
+
+                        <div id="id-{{ .ID }}" class="module-content">
+                            <div class="module-name">{{ moduleName .Name }}</div>
+                            <div class="module-value {{ if isFalse .Value }}red{{ else }}green{{ end }}">{{ floatPrecision1 .Value }}</div>
+                        </div>
+
+                        {{ if isActuator .Name }}
+                            <form data-device-id="{{ $deviceID }}" data-module-id="{{ .ID }}" class="actuator-form">
+
+                                <label class="switch">
+                                    <input class="actuator-switch" type="checkbox" name="actuator-form-value" {{ if isTrue .Value }}checked="checked"{{ end }}>
+                                    <span class="slider actuator-slider"></span>
+                                </label>
+                            </form>
+                        {{ end }}
+
+                    </div>
+                {{ end }}
             </div>
         {{ end }}
     </div>

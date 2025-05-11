@@ -1,11 +1,15 @@
 package main
 
 import (
+	"fmt"
 	"html/template"
 	"io/fs"
 	"path/filepath"
+	"strconv"
+	"strings"
 	"time"
 	
+	"HomeIoT/internal/data"
 	"HomeIoT/ui"
 )
 
@@ -16,6 +20,61 @@ var functions = template.FuncMap{
 	"increment":         increment,
 	"decrement":         decrement,
 	"transactionStatus": transactionStatus,
+	"moduleName":        moduleName,
+	"floatPrecision1":   floatPrecision1,
+	"isActuator":        isActuator,
+	"isFalse":           isFalse,
+	"isTrue":            isTrue,
+}
+
+func isTrue(s string) bool {
+	return strings.ToLower(s) == "true" || s == "1"
+}
+
+func isFalse(s string) bool {
+	return strings.ToLower(s) == "false" || s == "0"
+}
+
+func isActuator(name string) bool {
+	switch name {
+	case data.LIGHT_CONTROLLER:
+		return true
+	case data.PRESENCE_DETECTOR,
+		data.LUMINOSITY_SENSOR,
+		data.CONSUMPTION_SENSOR,
+		data.LIGHT_SENSOR,
+		data.TEMPERATURE_SENSOR:
+		return false
+	default:
+		return false
+	}
+}
+
+func floatPrecision1(value string) string {
+	floatValue, err := strconv.ParseFloat(value, 64)
+	if err != nil {
+		return value
+	}
+	return fmt.Sprintf("%.1f", floatValue)
+}
+
+func moduleName(name string) string {
+	switch name {
+	case data.LIGHT_CONTROLLER:
+		return "Lighting (ON/OFF)"
+	case data.PRESENCE_DETECTOR:
+		return "Presence Detector (True/False)"
+	case data.TEMPERATURE_SENSOR:
+		return "Temperature (ºC)"
+	case data.LUMINOSITY_SENSOR:
+		return "Luminosity (Lux)"
+	case data.CONSUMPTION_SENSOR:
+		return "Consumption (W/H)"
+	case data.LIGHT_SENSOR:
+		return "Lighting (ON/OFF)"
+	default:
+		return name
+	}
 }
 
 func transactionStatus(transactionStatus any, status string) string {

@@ -20,7 +20,7 @@ var ModuleNames = []string{
 	RESET,
 }
 
-func (m *ModuleModels) Set(module Module, value any) error {
+func (m *ModuleModels) Set(module *Module, value any) error {
 	iModule, err := module.ToIModule()
 	if err != nil {
 		return err
@@ -78,7 +78,7 @@ func (m *ModuleModels) Set(module Module, value any) error {
 func (m *ModuleModels) GetDevice(deviceID string) (*Device, error) {
 	var device Device
 	
-	err := m.DB.First(&device, "id = ?", deviceID).Error
+	err := m.DB.Preload("Location").First(&device, "id = ?", deviceID).Error
 	if err != nil {
 		switch {
 		case errors.Is(err, gorm.ErrRecordNotFound):
@@ -96,20 +96,15 @@ type ModuleModel struct {
 	Broker *Broker
 }
 
-func (m *ModuleModel) GetByID(id uint) (*IModule, error) {
+func (m *ModuleModel) GetByID(id uint) (*Module, error) {
 	var module Module
 	m.DB.First(&module, id)
 	
-	iModule, err := module.ToIModule()
-	if err != nil {
-		return nil, err
-	}
-	
-	return &iModule, nil
+	return &module, nil
 }
 
 func (m *DataModel) UpdateModule(module *Module) error {
-	err := m.DB.Model(module).Select("value").Updates(module).Error
+	err := m.DB.Model(module).Where("id = ?", module.ID).Update("value", module.Value).Error
 	if err != nil {
 		return fmt.Errorf("failed to update module: %w", err)
 	}

@@ -165,7 +165,6 @@
 
         {{/*including the CSRF token in the axios requests*/}}
         axios.defaults.headers.common['X-CSRF-TOKEN'] = {{ .CSRFToken }};
-        axios.defaults.withCredentials = true;
 
 
         {{/*####################################*/}}
@@ -231,13 +230,6 @@
         {{/*    Location name update form       */}}
         {{/*####################################*/}}
 
-        {{/*<form data-id="{{ .Location.ID }}" class="location-form">*/}}
-        {{/*    <input type="hidden" name="csrf_token" value="{{ $csrf_token }}">*/}}
-        {{/*        <label for="location-name-input"></label>*/}}
-        {{/*        <input id="location-name-input" type="text" class="location-name-input" value="{{ .Location.Name }}" />*/}}
-        {{/*        <button class="button location-form-button">Update</button>*/}}
-        {{/*</form>*/}}
-
         const locationForms = document.querySelectorAll('.location-form');
         if (!!locationForms && locationForms.length > 0) {
             locationForms.forEach(form => {
@@ -247,15 +239,58 @@
                     const locationName = form.querySelector('.location-name-input').value;
                     const locationID = form.dataset.id;
 
-                    axios.post(`/locations/${locationID}`, {
-                        locationName: locationName
-                    })
+                    axios.put(
+                        `/locations/${locationID}`,
+                        { locationName: locationName },
+                        { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+                    )
                         .then(response => {
                             console.log("Success:", response.data);
                         })
                         .catch(error => {
                             console.error("Error:", error.response?.data || error);
                         });
+                });
+            });
+        }
+
+
+        {{/*####################################*/}}
+        {{/*       Actuator command form        */}}
+        {{/*####################################*/}}
+
+        const actuatorForms = document.querySelectorAll('.actuator-form');
+        if (!!actuatorForms && actuatorForms.length > 0) {
+            actuatorForms.forEach(form => {
+
+                function submitForm() {
+                    const deviceID = form.dataset.deviceId;
+                    const moduleID = form.dataset.moduleId;
+
+                    // Get the input value and invert it to toggle it
+                    const switchInput = form.querySelector('.actuator-switch');
+                    const data = !switchInput.checked;
+
+                    axios.post(
+                        `/actuators/${deviceID}/${moduleID}`,
+                        { value: data },
+                        { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+                    )
+                        .then(response => {
+                            console.log("Success:", response.data);
+                        })
+                        .catch(error => {
+                            console.error("Error:", error.response?.data || error);
+                        });
+                }
+
+                const actuatorSlider = form.querySelector('.actuator-slider');
+                actuatorSlider.addEventListener('click', () => {
+                    submitForm();
+                });
+                form.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    submitForm();
                 });
             });
         }
@@ -285,7 +320,12 @@
                         deviceName.textContent = device.Name;
                     }
                     if (deviceType) {
-                        deviceType.textContent = device.Type;
+                        deviceType.textContent = `Type: ${device.Type}`;
+                    }
+
+                    const locationName = deviceElement.querySelector('.location .location-name');
+                    if (locationName) {
+                        locationName.textContent = device.Location.Name;
                     }
 
                     // Loop through the modules and update the module data
@@ -304,7 +344,19 @@
                                 if (module.Value !== '' && !isNaN(numericValue)) {
                                     moduleValue.textContent = numericValue.toFixed(1).toString();
                                 } else {
-                                    moduleValue.textContent = module.Value;
+                                    moduleValue.textContent = module.Value.charAt(0).toUpperCase() + module.Value.slice(1);
+                                }
+
+                                // Check if there is an actuator form
+                                const actuatorForm = document.querySelector(`.actuator-form[data-device-id="${device.ID}"][data-module-id="${module.ID}"]`);
+                                if (!!actuatorForm) {
+                                    const actuatorSwitch = actuatorForm.querySelector('.actuator-switch');
+
+                                    const boolValue = module.Value === 1 || module.Value.toLowerCase() === 'true';
+                                    actuatorSwitch.checked = boolValue;
+
+                                    moduleValue.classList.add(!boolValue ? 'red' : 'green');
+                                    moduleValue.classList.remove(!boolValue ? 'green' : 'red');
                                 }
                             }
                         }

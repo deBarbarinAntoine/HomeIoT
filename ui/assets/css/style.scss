@@ -2,6 +2,135 @@
 
 
 //##############################################################################################################
+//                                                  HOME PAGE                                                  #
+//##############################################################################################################
+
+$module-background: #fff;
+$module-border-color: #ddd;
+$highlight-color: #4CAF50;
+
+.home {
+    margin-bottom: 2.7rem;
+    width: 60%;
+    
+    .name {
+        font-size: 2.3rem;
+        font-weight: bold;
+        color: $white;
+        margin-bottom: .5rem;
+    }
+    .type {
+        font-size: 1.2rem;
+        color: #777;
+        margin-bottom: 1.7rem;
+    }
+    .location {
+        
+        .location-name {
+            font-size: 1.7rem;
+            margin: auto 0;
+        }
+    }
+    .module {
+        background-color: $white;
+        display: flex;
+        flex-direction: column;
+        align-items: end;
+        gap: .6rem;
+        border-radius: .6rem;
+        padding: 1rem;
+        margin-bottom: .6rem;
+        
+        .module-content {
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            
+            .module-name,
+            .module-value {
+                font-size: 1.2rem;
+                color: $blue;
+            }
+            .module-value {
+                font-weight: bold;
+                
+                &.red {
+                    color: $red;
+                }
+                &.green {
+                    color: $green;
+                }
+            }
+        }
+        .actuator-form {
+        
+        }
+    }
+}
+
+
+//##############################################################################################################
+//                                                  SWITCH SLIDER                                              #
+//##############################################################################################################
+
+
+/* The switch - the box around the slider */
+.switch {
+    font-size: 17px;
+    position: relative;
+    display: inline-block;
+    width: 3.5rem;
+    height: 2rem;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* The slider */
+.slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background: $red;
+    border-radius: 50px;
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1);
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 1.4rem;
+    width: 1.4rem;
+    left: 0.3rem;
+    bottom: 0.3rem;
+    background-color: white;
+    border-radius: 50px;
+    box-shadow: 0 0px 20px rgba(0,0,0,0.4);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.switch input:checked + .slider {
+    background: $green;
+}
+
+.switch input:focus + .slider {
+    box-shadow: 0 0 1px $green;
+}
+
+.switch input:checked + .slider:before {
+    transform: translateX(1.6rem);
+    width: 2rem;
+    height: 2rem;
+    bottom: 0;
+}
+
+
+//##############################################################################################################
 //                                             MARKDOWN POST CONTENT                                           #
 //##############################################################################################################
 
@@ -1557,61 +1686,4 @@ form.form-center {
         line-height: 2.5rem;
         color: $yellow;
     }
-}
-
-
-//##############################################################################################################
-//                                                  NICO  Devices                                              #
-//##############################################################################################################
-$module-background: #fff;
-$module-border-color: #ddd;
-$highlight-color: #4CAF50;
-
-.home {
-    margin-bottom: 30px;
-    width: 60%;
-
-    .name {
-        font-size: 24px;
-        font-weight: bold;
-        color: $white;
-        margin-bottom: 5px;
-    }
-
-    .type {
-        font-size: 16px;
-        color: #777;
-        margin-bottom: 20px;
-    }
-
-    .module {
-        background-color: $module-background;
-        border: 1px solid $module-border-color;
-        padding: 15px;
-        margin-bottom: 10px;
-        border-radius: 8px;
-        display: flex;
-        justify-content: space-between;
-
-        .module-name {
-            font-size: 16px;
-            color: $blue;
-        }
-
-        .module-value {
-            font-size: 16px;
-            color: $highlight-color;
-            font-weight: bold;
-        }
-    }
-}
-
-.type {
-    font-size: 18px;
-    color: #555;
-}
-
-.module-value {
-    color: #333;
-    font-size: 18px;
 }

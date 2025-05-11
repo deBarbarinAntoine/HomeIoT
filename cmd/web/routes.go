@@ -45,15 +45,13 @@ func (app *application) routes() http.Handler {
 	// #					   COMMANDS						 	 #
 	// ###########################################################
 	
-	router.HandleFunc("/:location/:locationID/:device/:deviceID/:information", app.commandDevice, http.MethodPost) // command relay route
+	router.HandleFunc("/actuators/:deviceID/:moduleID", app.commandDevice, http.MethodPost) // command relay route
 	
 	// ###########################################################
 	// #						AJAX							 #
 	// ###########################################################
 	
-	router.HandleFunc("/:location/:locationID/:device/:deviceID", app.getDeviceInfo, http.MethodGet) // device info route
-	
-	router.HandleFunc("/locations/:id", app.updateLocation, http.MethodPost)
+	router.HandleFunc("/locations/:id", app.updateLocation, http.MethodPut)
 	
 	router.HandleFunc("/ws", app.handleWebSocket, http.MethodGet)
 	

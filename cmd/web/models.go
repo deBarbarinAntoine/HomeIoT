@@ -81,3 +81,19 @@ type userLoginForm struct {
 	Password            string `form:"password"`
 	validator.Validator `form:"-"`
 }
+
+type locationUpdateForm struct {
+	LocationName string `form:"locationName"`
+}
+
+func newLocationUpdateForm() *locationUpdateForm {
+	return &locationUpdateForm{}
+}
+
+type commandValueForm struct {
+	Value string `form:"value"`
+}
+
+func newCommandValueForm() *commandValueForm {
+	return &commandValueForm{}
+}

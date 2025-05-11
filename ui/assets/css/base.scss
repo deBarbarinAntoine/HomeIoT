@@ -8,6 +8,7 @@ $input-background : #02344F;
 $medium-blue      : #034163;
 $blue             : #5995ED;
 $bright-blue      : #75DDDD;
+$green            : #157F1F;
 $red              : #A91101;
 $orange           : #FB8500;
 $yellow           : #FFB703;
@@ -114,6 +115,48 @@ $font-bold      : 730;
 
 .bold {
 	font-weight : 800;
+}
+
+.flex-row {
+	display: flex;
+	flex-direction: row;
+}
+
+.flex-column {
+	display: flex;
+	flex-direction: column;
+}
+
+.justify-center {
+	justify-content: center;
+}
+
+.justify-space-between {
+	justify-content: space-between;
+}
+
+.justify-space-around {
+	justify-content: space-around;
+}
+
+.align-center {
+	align-items: center;
+}
+
+.gap-3 {
+	gap: 3rem;
+}
+
+.padding-3 {
+	padding: 3rem;
+}
+
+.padding-h-3 {
+	padding: 0 3rem;
+}
+
+.padding-v-3 {
+	padding: 3rem 0;
 }
 
 //##############################################################################################################
@@ -265,6 +308,45 @@ $font-bold      : 730;
 		border-radius : .7rem;
 		padding       : 1.7rem 3.4rem;
 		font-size     : 2rem;
+	}
+}
+
+form {
+	//display: flex;
+	//flex-direction: column;
+	//gap: .5rem;
+	
+	label {
+		font-size: 1.3rem;
+		color: $blue;
+		font-weight: bold;
+		margin-bottom: .3rem;
+	}
+	.form-error {
+		margin: .4rem 0;
+		padding: .7rem 1.4rem;
+		font-size: 1.4rem;
+		text-align: center;
+		background-color: $yellow;
+		border: $red solid 2.5px;
+		border-radius: .4rem;
+		color: $red;
+	}
+	input:not([type=checkbox]):not([type=radio]) {
+		padding: .5rem 1rem;
+		border-radius: .4rem;
+		border: $blue solid 1.5px;
+		color: $white;
+		background-color: $input-background;
+		appearance: none;
+		outline: none;
+		
+		&:focus,
+		&:focus-visible,
+		&:focus-within,
+		&:active {
+			border: $orange solid 1.5px;
+		}
 	}
 }
 
@@ -464,31 +546,7 @@ footer.footer-ctn {
 	height          : 12rem;
 	padding         : 2.5rem 10% 1.2rem 10%;
 	display         : flex;
-	justify-content : space-between;
+	justify-content : center;
 	align-items     : center;
-	
-	.copyrights {
-		font-size : 1rem;
-		color     : $blue;
-	}
-	
-	nav.footer-links {
-		display : flex;
-		gap     : 2.5rem;
-		
-		a.footer-link {
-			font-size  : 1.2rem;
-			color      : $blue;
-			transition : color 200ms ease-out 20ms;
-			
-			&:hover {
-				color : $orange;
-			}
-		}
-	}
-	
-	.footer-social {
-		display : flex;
-		gap     : 1.2rem;
-	}
+	color: $blue;
 }

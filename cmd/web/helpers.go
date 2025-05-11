@@ -93,6 +93,9 @@ func (app *application) decodePostForm(r *http.Request, dst any) error {
 		return err
 	}
 	
+	// DEBUG
+	app.logger.Debug(fmt.Sprintf("form: %#v", r.PostForm))
+	
 	err = app.formDecoder.Decode(dst, r.PostForm)
 	if err != nil {
 		var invalidDecoderError *form.InvalidDecoderError
@@ -408,4 +411,17 @@ func getPathID(r *http.Request) (int, error) {
 	
 	// return the integer id
 	return id, nil
+}
+
+func getPathString(r *http.Request, paramName string) (string, error) {
+	
+	// fetching the param from the URL
+	param := flow.Param(r.Context(), paramName)
+	
+	// looking for errors
+	if param == "" {
+		return "", fmt.Errorf("param required")
+	}
+	
+	return param, nil
 }
