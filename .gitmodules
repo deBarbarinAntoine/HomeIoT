@@ -1,0 +1,3 @@
+[submodule "/home/thorgan/Prog/Go/HomeIoT/ESP32_Light"]
+	path = /home/thorgan/Prog/Go/HomeIoT/ESP32_Light
+	url = https://github.com/Home-N-Co/Light.git
