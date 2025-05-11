@@ -106,7 +106,6 @@ func (m *DataModel) startupHandler(client mqtt.Client, msg mqtt.Message) {
 			m.Logger.Error(err.Error())
 			return
 		}
-		// TODO -> what to do after creating the device, if necessary
 	}
 	
 	// Create new StartupMessage from device fetched or created
@@ -121,7 +120,6 @@ func (m *DataModel) startupHandler(client mqtt.Client, msg mqtt.Message) {
 }
 
 func (m *DataModel) messageHandler(client mqtt.Client, msg mqtt.Message) {
-	// FIXME -> remove or modify to accommodate normal usage!
 	// LOG WARNING MESSAGE
 	m.Logger.Warn("received unknown MQTT message", slog.String("HANDLER", "messageHandler"), slog.String("TOPIC", msg.Topic()), slog.String("PAYLOAD", string(msg.Payload())))
 }

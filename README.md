@@ -88,10 +88,10 @@ You'll also be able to **monitor the energy of specific high consumption applian
 - Controlling actuators from the web interface
 - Data collection in the database
 - Light and temperature management
-- Front door monitoring with `RFID` badge
 
 ### Additional features (future release)
 
+- Front door monitoring with `RFID` badge
 - Energy consumption management
 - Shutter and window management
 - Fire and smoke detection
@@ -315,8 +315,8 @@ flowchart LR
 │       ├── models.go
 │       ├── routes.go
 │       ├── server.go
-│       └── templates.go
-├── data.sql
+│       ├── templates.go
+│       └── websocket.go
 ├── go.mod
 ├── go.sum
 ├── internal
