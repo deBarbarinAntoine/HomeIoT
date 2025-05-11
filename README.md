@@ -704,11 +704,6 @@ sequenceDiagram
     participant A as Application
     participant B as Broker
     participant LiC as LightController
-    participant LiS as LightSensor
-    participant PD as PresenceDetector
-    participant LuS as LuminositySensor
-    participant TS as TemperatureSensor
-    participant CS as ConsumptionSensor
     end
     box Green Server
     participant MQTT as MQTT Broker
@@ -728,11 +723,6 @@ sequenceDiagram
     B ->> A: Parse `setup` message
     A ->> A: Update `location` and `locationID`
     A ->> LiC: Update value
-    A ->> LiS: Update value
-    A ->> PD: Update value
-    A ->> LuS: Update value
-    A ->> TS: Update value
-    A ->> CS: Update value
     A ->> S: Setup complete
 ```
 
