@@ -3,6 +3,13 @@
 
 ---
 
+## Authors
+
+- Antoine de Barbarin
+- Nicolas Moyon
+
+---
+
 ## Presentation
 
 This project is made by Computer Science students for an assignment involving a client application, in this case a website, and a real time interaction with the physical world via ESP32 boards.
